@@ -5,7 +5,7 @@
 [![STATUS](https://img.shields.io/badge/STATUS-EM%20DESENVOLVIMENTO-yellow?style=for-the-badge)](#)
 [![LICENSE](https://img.shields.io/badge/LICENSE-MIT-green?style=for-the-badge)](#)
 
-Status do Projeto: :heavy_check_mark: (concluído) | :warning: (em desenvolvimento) | :x: (não iniciada)
+Status do Projeto: :warning: (em desenvolvimento) 
 
 ---
 
