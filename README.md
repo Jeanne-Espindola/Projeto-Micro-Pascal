@@ -7,17 +7,6 @@
 
 Status do Projeto: :warning: (em desenvolvimento) 
 
----
-
-## Tópicos
-
-- [Contexto](#contexto)
-- [Problema](#problema)
-- [Público-Alvo](#público-alvo)
-- [Objetivo](#objetivo)
-- [Funcionalidades e Requisitos](#funcionalidades-e-requisitos)
-- [Como Executar](#como-executar)
-- [Autores](#autores)
 
 ---
 
@@ -27,8 +16,6 @@ Projeto desenvolvido para a disciplina de **Construção de Compiladores** na Un
 ## Problema
 O processamento de linguagens de programação exige a transformação de código-fonte em estruturas inteligíveis pelo computador. Sem as etapas de análise léxica e sintática adequadas, a validação estrutural de um programa escrito em micro-Pascal não é viável, impedindo a geração e execução posterior do código.
 
-## Público-Alvo
-Estudantes de Ciência da Computação e Engenharia da Computação, docentes e entusiastas na área de teoria das linguagens formais e construção de compiladores.
 
 ## Objetivo
 Implementar as duas primeiras etapas do compilador da linguagem micro-Pascal:
