@@ -3,6 +3,7 @@
 enum TipoDoToken{
     //palavras reservadas
     TOKEN_PROGRAM,
+    TOKEN_IF,
     TOKEN_THEN,
     TOKEN_ELSE,
     TOKEN_WHILE,
@@ -15,7 +16,9 @@ enum TipoDoToken{
     TOKEN_BEGIN,
     TOKEN_END,
     TOKEN_WRITE,
+    TOKEN_READ,
     TOKEN_VAR,
+
 
     //operadores
     TOKEN_MAIS,
