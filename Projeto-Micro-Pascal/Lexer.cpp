@@ -6,7 +6,7 @@ Token proximoToken(const char* texto, int* posicao, int* linhaAtual) {
     Token token;
     token.linha = *linhaAtual;
 
-    // 1. Ignorar Espaços em Branco, Tabulações e Quebras de Linha
+    
     while (texto[*posicao] == ' ' || texto[*posicao] == '\t' || texto[*posicao] == '\n' || texto[*posicao] == '\r') {
         if (texto[*posicao] == '\n') {
             (*linhaAtual)++;
@@ -15,14 +15,14 @@ Token proximoToken(const char* texto, int* posicao, int* linhaAtual) {
         token.linha = *linhaAtual;
     }
 
-    // 2. Fim de Arquivo (EOF)
+    
     if (texto[*posicao] == '\0') {
         token.tipo = TOKEN_EOF;
         strcpy(token.texto, "EOF");
         return token;
     }
 
-    // 3. Operadores Compostos (2 caracteres)
+   
     if (texto[*posicao] == ':' && texto[*posicao + 1] == '=') {
         token.tipo = TOKEN_ATRIBUICAO;
         strcpy(token.texto, ":=");
@@ -48,7 +48,7 @@ Token proximoToken(const char* texto, int* posicao, int* linhaAtual) {
         return token;
     }
 
-    // 4. Símbolos e Operadores Simples (1 caractere)
+   
     if (texto[*posicao] == ':') {
         token.tipo = TOKEN_DOIS_PONTOS;
         strcpy(token.texto, ":");
@@ -128,7 +128,7 @@ Token proximoToken(const char* texto, int* posicao, int* linhaAtual) {
         return token;
     }
 
-    // 5. Identificadores e Palavras Reservadas
+    
     if (isalpha(texto[*posicao])) {
         int i = 0;
         while (isalnum(texto[*posicao])) {
@@ -138,25 +138,50 @@ Token proximoToken(const char* texto, int* posicao, int* linhaAtual) {
         }
         token.texto[i] = '\0';
 
-        if (strcmp(token.texto, "program") == 0) token.tipo = TOKEN_PROGRAM;
-        else if (strcmp(token.texto, "var") == 0) token.tipo = TOKEN_VAR;
-        else if (strcmp(token.texto, "integer") == 0) token.tipo = TOKEN_INTEGER;
-        else if (strcmp(token.texto, "real") == 0) token.tipo = TOKEN_REAL;
-        else if (strcmp(token.texto, "begin") == 0) token.tipo = TOKEN_BEGIN;
-        else if (strcmp(token.texto, "end") == 0) token.tipo = TOKEN_END;
-        else if (strcmp(token.texto, "if") == 0) token.tipo = TOKEN_IF;
-        else if (strcmp(token.texto, "then") == 0) token.tipo = TOKEN_THEN;
-        else if (strcmp(token.texto, "else") == 0) token.tipo = TOKEN_ELSE;
-        else if (strcmp(token.texto, "while") == 0) token.tipo = TOKEN_WHILE;
-        else if (strcmp(token.texto, "do") == 0) token.tipo = TOKEN_DO;
-        else if (strcmp(token.texto, "write") == 0) token.tipo = TOKEN_WRITE;
-        else if (strcmp(token.texto, "read") == 0) token.tipo = TOKEN_READ;
+        if (strcmp(token.texto, "program") == 0){
+             token.tipo = TOKEN_PROGRAM;
+            }
+        else if (strcmp(token.texto, "var") == 0){
+             token.tipo = TOKEN_VAR; 
+            }
+        else if (strcmp(token.texto, "integer") == 0){ 
+            token.tipo = TOKEN_INTEGER; }
+        else if (strcmp(token.texto, "real") == 0){
+             token.tipo = TOKEN_REAL;
+            }
+        else if (strcmp(token.texto, "begin") == 0){
+             token.tipo = TOKEN_BEGIN;
+            }
+        else if (strcmp(token.texto, "end") == 0){
+             token.tipo = TOKEN_END;
+            }
+        else if (strcmp(token.texto, "if") == 0){
+             token.tipo = TOKEN_IF; 
+            }
+        else if (strcmp(token.texto, "then") == 0){
+             token.tipo = TOKEN_THEN;
+        }
+        else if (strcmp(token.texto, "else") == 0) {
+             token.tipo = TOKEN_ELSE; 
+        }
+        else if (strcmp(token.texto, "while") == 0){
+             token.tipo = TOKEN_WHILE;
+            }
+        else if (strcmp(token.texto, "do") == 0){
+             token.tipo = TOKEN_DO;
+            }
+        else if (strcmp(token.texto, "write") == 0){
+             token.tipo = TOKEN_WRITE;
+        }
+        else if (strcmp(token.texto, "read") == 0){
+             token.tipo = TOKEN_READ;
+            }
         else token.tipo = TOKEN_IDENTIFICADOR;
 
         return token;
     }
 
-    // 6. Números Inteiros
+   
     if (isdigit(texto[*posicao])) {
         int i = 0;
         while (isdigit(texto[*posicao])) {
@@ -170,7 +195,7 @@ Token proximoToken(const char* texto, int* posicao, int* linhaAtual) {
         return token;
     }
 
-    // Erro Léxico: Caractere não reconhecido
+    
     token.tipo = TOKEN_ERRO;
     token.texto[0] = texto[*posicao];
     token.texto[1] = '\0';
