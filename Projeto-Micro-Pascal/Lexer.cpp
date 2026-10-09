@@ -1,6 +1,7 @@
 #include "Lexer.h"
 #include <ctype.h>
 #include <string.h>
+#include <stdio.h>
 
 Token proximoToken(const char* texto, int* posicao, int* linhaAtual) {
     Token token;
@@ -109,6 +110,23 @@ Token proximoToken(const char* texto, int* posicao, int* linhaAtual) {
         (*posicao)++;
         return token;
     }
+    // Tratamento de caractere literal (ex: 'a', 'p', '\n', '\t')
+    if (texto[*posicao] == '\'') {
+        token.tipo = TOKEN_LITERAL_CHAR;
+        int i = 0;
+        token.texto[i++] = texto[(*posicao)++]; // Pega a aspa de abertura
+
+        while (texto[*posicao] != '\0' && texto[*posicao] != '\'' && i < 98) {
+            token.texto[i++] = texto[(*posicao)++];
+        }
+
+        if (texto[*posicao] == '\'') {
+            token.texto[i++] = texto[(*posicao)++]; // Pega a aspa de fechamento
+        }
+        
+        token.texto[i] = '\0';
+        return token;
+    }
     if (texto[*posicao] == '=') {
         token.tipo = TOKEN_IGUAL;
         strcpy(token.texto, "=");
@@ -170,16 +188,33 @@ Token proximoToken(const char* texto, int* posicao, int* linhaAtual) {
         else if (strcmp(token.texto, "do") == 0){
              token.tipo = TOKEN_DO;
             }
-        else if (strcmp(token.texto, "write") == 0){
-             token.tipo = TOKEN_WRITE;
+       else if (strcmp(token.texto, "write") == 0){
+            token.tipo = TOKEN_WRITE;
         }
-        else if (strcmp(token.texto, "read") == 0){
-             token.tipo = TOKEN_READ;
-            }
-        else token.tipo = TOKEN_IDENTIFICADOR;
-
-        return token;
+        else if (strcmp(token.texto, "repeat") == 0){
+            token.tipo = TOKEN_REPEAT;
     }
+        else if (strcmp(token.texto, "until") == 0){
+            token.tipo = TOKEN_UNTIL;
+    }
+        else if (strcmp(token.texto, "div") == 0){
+            token.tipo = TOKEN_DIV_INT;
+    }
+        else if (strcmp(token.texto, "and") == 0){
+            token.tipo = TOKEN_AND;
+    }
+        else if (strcmp(token.texto, "or") == 0){
+            token.tipo = TOKEN_OR;
+    }
+        else if (strcmp(token.texto, "not") == 0){
+            token.tipo = TOKEN_NOT;
+    }
+        else {
+            token.tipo = TOKEN_IDENTIFICADOR;
+    }
+
+    return token;
+}
 
    
     if (isdigit(texto[*posicao])) {
@@ -199,6 +234,10 @@ Token proximoToken(const char* texto, int* posicao, int* linhaAtual) {
     token.tipo = TOKEN_ERRO;
     token.texto[0] = texto[*posicao];
     token.texto[1] = '\0';
+    
+    
+    printf("Erro léxico no caracter [%c]\n", texto[*posicao]);
+    
     (*posicao)++;
     return token;
 }
