@@ -1,44 +1,24 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "Parser.h"
 
-
-char* lerArquivo(const char* nomeArquivo) {
-    FILE* file = fopen(nomeArquivo, "rb");
-    if (!file) {
-        printf("Erro ao abrir o arquivo: %s\n", nomeArquivo);
-        return NULL;
-    }
-
- 
-    fseek(file, 0, SEEK_END);
-    long length = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-  
-    char* buffer = (char*)malloc(length + 1);
-    if (buffer) {
-        fread(buffer, 1, length, file);
-        buffer[length] = '\0';
-    }
-    fclose(file);
-    return buffer;
-}
-
-int main(int argc, char* argv[]) {
-    const char* caminhoArquivo = (argc > 1) ? argv[1] : "programa.mp";
-
-    char* fonte = lerArquivo(caminhoArquivo);
-    if (!fonte) {
+int main() {
+    // 1. Abre o ficheiro de teste diretamente para leitura
+    FILE* arquivo = fopen("teste.mp", "r");
+    if (!arquivo) {
+        printf("Erro ao abrir o arquivo teste.mp\n");
         return 1;
     }
 
-    Parser parser(fonte);
-    parser.analisar();
-    
-    
-    printf("Análise concluída sem erros.\n");
+    // 2. Lê o código para um buffer fixo na memória
+    char buffer[4096];
+    int tamanho = fread(buffer, 1, sizeof(buffer) - 1, arquivo);
+    buffer[tamanho] = '\0';
+    fclose(arquivo);
 
-    free(fonte);
+    // 3. Dispara o Parser e a análise
+    Parser parser(buffer);
+    parser.analisar();
+
+    printf("Análise concluída sem erros.\n");
     return 0;
 }

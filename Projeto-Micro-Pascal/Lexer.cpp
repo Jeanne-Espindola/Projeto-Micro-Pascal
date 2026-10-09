@@ -110,18 +110,18 @@ Token proximoToken(const char* texto, int* posicao, int* linhaAtual) {
         (*posicao)++;
         return token;
     }
-    // Tratamento de caractere literal (ex: 'a', 'p', '\n', '\t')
+    
     if (texto[*posicao] == '\'') {
         token.tipo = TOKEN_LITERAL_CHAR;
         int i = 0;
-        token.texto[i++] = texto[(*posicao)++]; // Pega a aspa de abertura
+        token.texto[i++] = texto[(*posicao)++]; 
 
         while (texto[*posicao] != '\0' && texto[*posicao] != '\'' && i < 98) {
             token.texto[i++] = texto[(*posicao)++];
         }
 
         if (texto[*posicao] == '\'') {
-            token.texto[i++] = texto[(*posicao)++]; // Pega a aspa de fechamento
+            token.texto[i++] = texto[(*posicao)++]; 
         }
         
         token.texto[i] = '\0';

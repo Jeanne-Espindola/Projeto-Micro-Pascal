@@ -60,10 +60,8 @@ struct Token{
     enum TipoDoToken tipo;
     char texto[100]; 
     int linha; 
-
-   
-
 };
+
 
 Token proximoToken(const char* texto, int* posicao, int* linhaAtual);
 
