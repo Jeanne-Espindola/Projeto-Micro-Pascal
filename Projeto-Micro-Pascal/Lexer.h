@@ -56,11 +56,15 @@ enum TipoDoToken{
     TOKEN_ERRO
 };
 
+typedef enum TipoDoToken TipoDoToken; 
+
 struct Token{
     enum TipoDoToken tipo;
     char texto[100]; 
     int linha; 
 };
+
+typedef struct Token Token;
 
 
 Token proximoToken(const char* texto, int* posicao, int* linhaAtual);
