@@ -2,218 +2,248 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-Parser::Parser(const char* codigoFonte) {
-    fonte = codigoFonte;
-    posicao = 0;
-    linha = 1;
-    avancar();
+static void avancar(Parser* p);
+static void erroSintaxe(Parser* p);
+static void consumir(Parser* p, TipoDoToken tipoEsperado);
+
+static void programa(Parser* p);
+static void secaoVar(Parser* p);
+static void declVar(Parser* p);
+static void tipo(Parser* p);
+static void bloco(Parser* p);
+static void listaComandos(Parser* p);
+static void comando(Parser* p);
+static void atribuicao(Parser* p);
+static void iteracao(Parser* p);
+static void decisao(Parser* p);
+static void escrita(Parser* p);
+
+static void expressao(Parser* p);
+static void exprLogica(Parser* p);
+static void exprRelacional(Parser* p);
+static void exprAditiva(Parser* p);
+static void exprMultiplicativa(Parser* p);
+static void exprFator(Parser* p);
+static void exprBasica(Parser* p);
+
+
+
+void parser_init(Parser* p, const char* codigoFonte) {
+    p->fonte = codigoFonte;
+    p->posicao = 0;
+    p->linha = 1;
+    avancar(p);
 }
 
-void Parser::avancar() {
-    tokenAtual = proximoToken(fonte, &posicao, &linha);
-    if (tokenAtual.tipo == TOKEN_ERRO) {
-        printf("Erro léxico no caracter [%s]\n", tokenAtual.texto);
+void parser_analisar(Parser* p) {
+    programa(p);
+    if (p->tokenAtual.tipo != TOKEN_EOF) {
+        erroSintaxe(p);
+    }
+}
+
+
+static void avancar(Parser* p) {
+    p->tokenAtual = proximoToken(p->fonte, &p->posicao, &p->linha);
+    if (p->tokenAtual.tipo == TOKEN_ERRO) {
+        printf("Erro léxico no caracter [%s]\n", p->tokenAtual.texto);
         exit(1);
     }
 }
 
-void Parser::erroSintaxe() {
-    printf("Erro de sintaxe no token [%s]\n", tokenAtual.texto);
+static void erroSintaxe(Parser* p) {
+    printf("Erro de sintaxe no token [%s]\n", p->tokenAtual.texto);
     exit(1);
 }
 
-void Parser::consumir(TipoDoToken tipoEsperado) {
-    if (tokenAtual.tipo == tipoEsperado) {
-        avancar();
+static void consumir(Parser* p, TipoDoToken tipoEsperado) {
+    if (p->tokenAtual.tipo == tipoEsperado) {
+        avancar(p);
     } else {
-        erroSintaxe();
+        erroSintaxe(p);
     }
 }
 
-void Parser::analisar() {
-    programa();
-    if (tokenAtual.tipo != TOKEN_EOF) {
-        erroSintaxe();
-    }
+
+
+static void programa(Parser* p) {
+    consumir(p, TOKEN_PROGRAM);
+    consumir(p, TOKEN_IDENTIFICADOR);
+    consumir(p, TOKEN_PONTO_VIRGULA);
+    secaoVar(p);
+    bloco(p);
+    consumir(p, TOKEN_PONTO);
 }
 
-void Parser::programa() {
-    consumir(TOKEN_PROGRAM);
-    consumir(TOKEN_IDENTIFICADOR);
-    consumir(TOKEN_PONTO_VIRGULA);
-    secaoVar();
-    bloco();
-    consumir(TOKEN_PONTO);
-}
-,
-void Parser::secaoVar() {
-    if (tokenAtual.tipo == TOKEN_VAR) {
-        consumir(TOKEN_VAR);
-        while (tokenAtual.tipo == TOKEN_IDENTIFICADOR) {
-            declVar();
+static void secaoVar(Parser* p) {
+    if (p->tokenAtual.tipo == TOKEN_VAR) {
+        consumir(p, TOKEN_VAR);
+        while (p->tokenAtual.tipo == TOKEN_IDENTIFICADOR) {
+            declVar(p);
         }
     }
 }
 
-void Parser::declVar() {
-    consumir(TOKEN_IDENTIFICADOR);
-    while (tokenAtual.tipo == TOKEN_VIRGULA) {
-        consumir(TOKEN_VIRGULA);
-        consumir(TOKEN_IDENTIFICADOR);
+static void declVar(Parser* p) {
+    consumir(p, TOKEN_IDENTIFICADOR);
+    while (p->tokenAtual.tipo == TOKEN_VIRGULA) {
+        consumir(p, TOKEN_VIRGULA);
+        consumir(p, TOKEN_IDENTIFICADOR);
     }
-    consumir(TOKEN_DOIS_PONTOS);
-    tipo();
-    consumir(TOKEN_PONTO_VIRGULA);
+    consumir(p, TOKEN_DOIS_PONTOS);
+    tipo(p);
+    consumir(p, TOKEN_PONTO_VIRGULA);
 }
 
-void Parser::tipo() {
-    if (tokenAtual.tipo == TOKEN_INTEGER || 
-        tokenAtual.tipo == TOKEN_REAL || 
-        tokenAtual.tipo == TOKEN_CHAR) {
-        avancar();
+static void tipo(Parser* p) {
+    if (p->tokenAtual.tipo == TOKEN_INTEGER ||
+        p->tokenAtual.tipo == TOKEN_REAL ||
+        p->tokenAtual.tipo == TOKEN_CHAR) {
+        avancar(p);
     } else {
-        erroSintaxe();
+        erroSintaxe(p);
     }
 }
 
-void Parser::bloco() {
-    consumir(TOKEN_BEGIN);
-    listaComandos();
-    consumir(TOKEN_END);
+static void bloco(Parser* p) {
+    consumir(p, TOKEN_BEGIN);
+    listaComandos(p);
+    consumir(p, TOKEN_END);
 }
 
-void Parser::listaComandos() {
-    while (tokenAtual.tipo == TOKEN_BEGIN ||
-           tokenAtual.tipo == TOKEN_IDENTIFICADOR ||
-           tokenAtual.tipo == TOKEN_WHILE ||
-           tokenAtual.tipo == TOKEN_REPEAT ||
-           tokenAtual.tipo == TOKEN_IF ||
-           tokenAtual.tipo == TOKEN_WRITE) {
-        comando();
+static void listaComandos(Parser* p) {
+    while (p->tokenAtual.tipo == TOKEN_BEGIN ||
+           p->tokenAtual.tipo == TOKEN_IDENTIFICADOR ||
+           p->tokenAtual.tipo == TOKEN_WHILE ||
+           p->tokenAtual.tipo == TOKEN_REPEAT ||
+           p->tokenAtual.tipo == TOKEN_IF ||
+           p->tokenAtual.tipo == TOKEN_WRITE) {
+        comando(p);
     }
 }
 
-void Parser::comando() {
-    if (tokenAtual.tipo == TOKEN_BEGIN) {
-        bloco();
-        consumir(TOKEN_PONTO_VIRGULA);
-    } else if (tokenAtual.tipo == TOKEN_IDENTIFICADOR) {
-        atribuicao();
-    } else if (tokenAtual.tipo == TOKEN_WHILE || tokenAtual.tipo == TOKEN_REPEAT) {
-        iteracao();
-    } else if (tokenAtual.tipo == TOKEN_IF) {
-        decisao();
-    } else if (tokenAtual.tipo == TOKEN_WRITE) {
-        escrita();
+
+
+static void comando(Parser* p) {
+    if (p->tokenAtual.tipo == TOKEN_BEGIN) {
+        bloco(p);
+        consumir(p, TOKEN_PONTO_VIRGULA);
+    } else if (p->tokenAtual.tipo == TOKEN_IDENTIFICADOR) {
+        atribuicao(p);
+    } else if (p->tokenAtual.tipo == TOKEN_WHILE || p->tokenAtual.tipo == TOKEN_REPEAT) {
+        iteracao(p);
+    } else if (p->tokenAtual.tipo == TOKEN_IF) {
+        decisao(p);
+    } else if (p->tokenAtual.tipo == TOKEN_WRITE) {
+        escrita(p);
     } else {
-        erroSintaxe();
+        erroSintaxe(p);
     }
 }
 
-void Parser::atribuicao() {
-    consumir(TOKEN_IDENTIFICADOR);
-    consumir(TOKEN_ATRIBUICAO);
-    expressao();
-    consumir(TOKEN_PONTO_VIRGULA);
+static void atribuicao(Parser* p) {
+    consumir(p, TOKEN_IDENTIFICADOR);
+    consumir(p, TOKEN_ATRIBUICAO);
+    expressao(p);
+    consumir(p, TOKEN_PONTO_VIRGULA);
 }
 
-void Parser::iteracao() {
-    if (tokenAtual.tipo == TOKEN_WHILE) {
-        consumir(TOKEN_WHILE);
-        expressao();
-        consumir(TOKEN_DO);
-        comando();
-    } else if (tokenAtual.tipo == TOKEN_REPEAT) {
-        consumir(TOKEN_REPEAT);
-        while (tokenAtual.tipo != TOKEN_UNTIL && tokenAtual.tipo != TOKEN_EOF) {
-            comando();
+static void iteracao(Parser* p) {
+    if (p->tokenAtual.tipo == TOKEN_WHILE) {
+        consumir(p, TOKEN_WHILE);
+        expressao(p);
+        consumir(p, TOKEN_DO);
+        comando(p);
+    } else if (p->tokenAtual.tipo == TOKEN_REPEAT) {
+        consumir(p, TOKEN_REPEAT);
+        while (p->tokenAtual.tipo != TOKEN_UNTIL && p->tokenAtual.tipo != TOKEN_EOF) {
+            comando(p);
         }
-        consumir(TOKEN_UNTIL);
-        expressao();
-        consumir(TOKEN_PONTO_VIRGULA);
+        consumir(p, TOKEN_UNTIL);
+        expressao(p);
+        consumir(p, TOKEN_PONTO_VIRGULA);
     }
 }
 
-void Parser::decisao() {
-    consumir(TOKEN_IF);
-    expressao();
-    consumir(TOKEN_THEN);
-    comando();
-    if (tokenAtual.tipo == TOKEN_ELSE) {
-        consumir(TOKEN_ELSE);
-        comando();
+static void decisao(Parser* p) {
+    consumir(p, TOKEN_IF);
+    expressao(p);
+    consumir(p, TOKEN_THEN);
+    comando(p);
+    if (p->tokenAtual.tipo == TOKEN_ELSE) {
+        consumir(p, TOKEN_ELSE);
+        comando(p);
     }
 }
 
-void Parser::escrita() {
-    consumir(TOKEN_WRITE);
-    consumir(TOKEN_ABRE_PAR);
-    expressao();
-    consumir(TOKEN_FECHA_PAR);
-    consumir(TOKEN_PONTO_VIRGULA);
+static void escrita(Parser* p) {
+    consumir(p, TOKEN_WRITE);
+    consumir(p, TOKEN_ABRE_PAR);
+    expressao(p);
+    consumir(p, TOKEN_FECHA_PAR);
+    consumir(p, TOKEN_PONTO_VIRGULA);
 }
 
-// --- EXPRESSÕES ---
 
-void Parser::expressao() {
-    exprLogica();
+static void expressao(Parser* p) {
+    exprLogica(p);
 }
 
-void Parser::exprLogica() {
-    exprRelacional();
-    while (tokenAtual.tipo == TOKEN_OR || tokenAtual.tipo == TOKEN_AND) {
-        avancar();
-        exprRelacional();
+static void exprLogica(Parser* p) {
+    exprRelacional(p);
+    while (p->tokenAtual.tipo == TOKEN_OR || p->tokenAtual.tipo == TOKEN_AND) {
+        avancar(p);
+        exprRelacional(p);
     }
 }
 
-void Parser::exprRelacional() {
-    exprAditiva();
-    while (tokenAtual.tipo == TOKEN_IGUAL || tokenAtual.tipo == TOKEN_DIFERENTE ||
-           tokenAtual.tipo == TOKEN_MENOR_IGUAL || tokenAtual.tipo == TOKEN_MENOR ||
-           tokenAtual.tipo == TOKEN_MAIOR_IGUAL || tokenAtual.tipo == TOKEN_MAIOR) {
-        avancar();
-        exprAditiva();
+static void exprRelacional(Parser* p) {
+    exprAditiva(p);
+    while (p->tokenAtual.tipo == TOKEN_IGUAL || p->tokenAtual.tipo == TOKEN_DIFERENTE ||
+           p->tokenAtual.tipo == TOKEN_MENOR_IGUAL || p->tokenAtual.tipo == TOKEN_MENOR ||
+           p->tokenAtual.tipo == TOKEN_MAIOR_IGUAL || p->tokenAtual.tipo == TOKEN_MAIOR) {
+        avancar(p);
+        exprAditiva(p);
     }
 }
 
-void Parser::exprAditiva() {
-    exprMultiplicativa();
-    while (tokenAtual.tipo == TOKEN_MAIS || tokenAtual.tipo == TOKEN_MENOS) {
-        avancar();
-        exprMultiplicativa();
+static void exprAditiva(Parser* p) {
+    exprMultiplicativa(p);
+    while (p->tokenAtual.tipo == TOKEN_MAIS || p->tokenAtual.tipo == TOKEN_MENOS) {
+        avancar(p);
+        exprMultiplicativa(p);
     }
 }
 
-void Parser::exprMultiplicativa() {
-    exprFator();
-    while (tokenAtual.tipo == TOKEN_MULT || tokenAtual.tipo == TOKEN_DIV_REAL ||
-           tokenAtual.tipo == TOKEN_DIV_INT) {
-        avancar();
-        exprFator();
+static void exprMultiplicativa(Parser* p) {
+    exprFator(p);
+    while (p->tokenAtual.tipo == TOKEN_MULT || p->tokenAtual.tipo == TOKEN_DIV_REAL ||
+           p->tokenAtual.tipo == TOKEN_DIV_INT) {
+        avancar(p);
+        exprFator(p);
     }
 }
 
-void Parser::exprFator() {
-    if (tokenAtual.tipo == TOKEN_NOT) {
-        avancar();
-        exprFator();
+static void exprFator(Parser* p) {
+    if (p->tokenAtual.tipo == TOKEN_NOT) {
+        avancar(p);
+        exprFator(p);
     } else {
-        exprBasica();
+        exprBasica(p);
     }
 }
 
-void Parser::exprBasica() {
-    if (tokenAtual.tipo == TOKEN_ABRE_PAR) {
-        consumir(TOKEN_ABRE_PAR);
-        expressao();
-        consumir(TOKEN_FECHA_PAR);
-    } else if (tokenAtual.tipo == TOKEN_LITERAL_INTEIRO ||
-               tokenAtual.tipo == TOKEN_LITERAL_REAL ||
-               tokenAtual.tipo == TOKEN_LITERAL_CHAR ||
-               tokenAtual.tipo == TOKEN_IDENTIFICADOR) {
-        avancar();
+static void exprBasica(Parser* p) {
+    if (p->tokenAtual.tipo == TOKEN_ABRE_PAR) {
+        consumir(p, TOKEN_ABRE_PAR);
+        expressao(p);
+        consumir(p, TOKEN_FECHA_PAR);
+    } else if (p->tokenAtual.tipo == TOKEN_LITERAL_INTEIRO ||
+               p->tokenAtual.tipo == TOKEN_LITERAL_REAL ||
+               p->tokenAtual.tipo == TOKEN_LITERAL_CHAR ||
+               p->tokenAtual.tipo == TOKEN_IDENTIFICADOR) {
+        avancar(p);
     } else {
-        erroSintaxe();
+        erroSintaxe(p);
     }
 }
