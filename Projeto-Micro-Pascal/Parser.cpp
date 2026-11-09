@@ -45,7 +45,7 @@ void Parser::programa() {
     bloco();
     consumir(TOKEN_PONTO);
 }
-
+,
 void Parser::secaoVar() {
     if (tokenAtual.tipo == TOKEN_VAR) {
         consumir(TOKEN_VAR);

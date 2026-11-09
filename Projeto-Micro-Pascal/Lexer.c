@@ -236,7 +236,7 @@ Token proximoToken(const char* texto, int* posicao, int* linhaAtual) {
     token.texto[1] = '\0';
     
     
-    printf("Erro léxico no caracter [%c]\n", texto[*posicao]);
+    printf("Erro léxico no caracter [%c]\n", texto[*posicao]); 
     
     (*posicao)++;
     return token;
