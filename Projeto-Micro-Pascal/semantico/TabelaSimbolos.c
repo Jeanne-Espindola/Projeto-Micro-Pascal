@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "TabelaSimbolos.h"
+#include "Tipos.h"
 
 Hash* criar(int TABLE_SIZE) {
     Hash *ha = malloc(sizeof(Hash));
@@ -9,7 +10,7 @@ Hash* criar(int TABLE_SIZE) {
         ha-> TABLE_SIZE = TABLE_SIZE;
         ha-> qtd = 0;
     }
-    ha-> symbol = calloc(TABLE_SIZE, sizeof(Simbolos));
+    ha-> symbol = (Simbolos**) calloc(TABLE_SIZE, sizeof(Simbolos*));
     if(ha->symbol == NULL) {
         free(ha);
         return NULL;
@@ -41,17 +42,25 @@ void mensagemerro(char *msg) {
     printf("Erro Semantico %s\n", msg);
 }
 
-int inserir(Hash *ha, char *nome) {
+int inserir(Hash *ha, char *nome, TipoSemantico tipo) {
 
     if(ha == NULL) {
         return 0;
     }
     int pos = funcao_hash(ha->TABLE_SIZE, nome);
     Simbolos* novo = malloc(sizeof(Simbolos));
+    if(novo == NULL) return 0;
 
     strcpy(novo->nome, nome);
+    novo ->tipo = tipo;
+
+    if(ha->symbol[pos] != NULL) {
+        free(ha->symbol[pos]);
+    } else {
+        ha->qtd++;
+    }
+
     ha->symbol[pos] = novo;
-    ha->qtd++;
     return 1;
 
 }
@@ -62,7 +71,7 @@ int consultar(Hash *ha, char *nome, Simbolos *out) {
         return 0;
     }
 
-    int pos = funcao_hash(ha->TABLE_SIZE, nome);
+    int pos = funcao_hash(ha->TABLE_SIZE,nome);
 
     if(ha->symbol[pos] == NULL) {
         return 0; //posição vazia
@@ -81,7 +90,7 @@ void imprimir(Hash *ha) {
         printf("Tabela (size=%d, qtd=%d)\n", ha->TABLE_SIZE, ha->qtd);
         for (int i = 0; i < ha->TABLE_SIZE; i++) {
             if (ha->symbol[i] != NULL) 
-                printf("[%d] = %s\n", i, *ha->symbol[i]);
+                printf("[%d] = NOME: %s\n TIPO: %d\n" , i, ha->symbol[i]->nome,ha->symbol[i]->tipo);
             else              
                 printf("[%d] = NULL\n", i);
         }
